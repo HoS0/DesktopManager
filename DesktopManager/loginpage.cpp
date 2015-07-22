@@ -152,20 +152,7 @@ QColor LoginPage::color()
 
 void LoginPage::checkCredentials()
 {
-	QString mes;
-	mes += "{";
-	mes += "\"action\": \"retrieve\", ";
-	mes += "\"type\": \"user\", ";
-	mes += "\"payload\": { ";
-	mes += "\"username\": \"ali\", ";
-	mes += "\"password\": \"alikh\" ";
-	mes += "}, ";
-	mes += "\"sender\": \"memememe\" ";
-	mes += "} ";
-
-	m_amqpManager->sendMessage("datamanager", mes);
-
-	if (usernameEditor->text().trimmed() == "ali" && passwordEditor->text() == "alikh")
+	if (m_amqpManager->authenticateUser(usernameEditor->text().trimmed(), passwordEditor->text()))
 	{
 		emit loginAccepted();
 	}

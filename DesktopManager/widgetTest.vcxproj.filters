@@ -125,6 +125,15 @@
     <ClCompile Include="qamqptable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="hosrequest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_hosrequest.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_hosrequest.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="widgettest.ui">
@@ -158,6 +167,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="qamqpqueue.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="hosrequest.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

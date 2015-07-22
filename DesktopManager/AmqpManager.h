@@ -7,12 +7,14 @@
 #include <QDebug>
 #include <QWidget>
 #include <QObject>
+#include <QJsonArray>
 #include "qamqpclient.h"
 #include "qamqpexchange.h"
 #include "qamqpqueue.h"
 #include "QUuid"
 #include <QJsonDocument>
 #include <QJsonObject>
+#include "hosrequest.h"
 
 class AmqpManager : public QObject
 {
@@ -22,7 +24,9 @@ public:
 	AmqpManager();
 	~AmqpManager();
 
-	void sendMessage(QString to, QString message);
+	void sendMessage(QString to, HoSRequest *req);
+
+	bool authenticateUser(QString username, QString password);
 
 public slots:
 	void start();
@@ -35,12 +39,15 @@ private slots:
 
 	void messageReceived();
 
+
 private:
 	QAmqpClient m_client;
 
 	QAmqpQueue *m_queue;
 
 	QString m_serviceName;
+
+	QList<HoSRequest*> requests;
 };
 
 #endif
