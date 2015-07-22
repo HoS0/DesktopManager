@@ -14,6 +14,8 @@
 #include "QUuid"
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <chrono>
+#include <thread>
 #include "hosrequest.h"
 
 class AmqpManager : public QObject
@@ -48,6 +50,8 @@ private:
 	QString m_serviceName;
 
 	QList<HoSRequest*> requests;
+
+	QString id;
 };
 
 #endif

@@ -27,6 +27,8 @@ public:
 	QString CreatePayloadBody();
 	
 	void setResponseNeeded(bool value);
+	void setType(PayloadType value);
+	void setAction(Action value);
 
 	Action action;
 	PayloadType type;

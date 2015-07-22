@@ -79,3 +79,15 @@ QString HoSRequest::ConvertTypetoString(PayloadType type)
 		return "";
 	}
 }
+
+void HoSRequest::setType(PayloadType value)
+{
+	type = value;
+	CreateMessageBody();
+}
+
+void HoSRequest::setAction(Action value)
+{
+	action = value;
+	CreateMessageBody();
+}

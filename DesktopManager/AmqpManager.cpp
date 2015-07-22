@@ -3,6 +3,8 @@
 
 AmqpManager::AmqpManager()
 {
+	id = QUuid::createUuid().toString().replace("{", "").replace("}", "");
+	m_serviceName = "desktopmanager." + id;
 	start();
 }
 
@@ -17,7 +19,8 @@ AmqpManager::~AmqpManager()
 void AmqpManager::start()
 {
 	connect(&m_client, SIGNAL(connected()), this, SLOT(clientConnected()));
-	connect(&m_client, SIGNAL(disconnected()), qApp, SLOT(quit()));
+	//connect(&m_client, SIGNAL(disconnected()), this, SLOT(retryConnection()));
+	//m_client.setAutoReconnect(true);
 	m_client.connectToHost();
 }
 
@@ -25,8 +28,6 @@ void AmqpManager::clientConnected()
 {
 	QAmqpExchange* defaultExchange = m_client.createExchange("desktopmanager");
 	defaultExchange->declare(QAmqpExchange::Direct, QAmqpExchange::AutoDelete);
-	QString id = QUuid::createUuid().toString().replace("{", "").replace("}", "");
-	m_serviceName = "desktopmanager." + id;
 	m_queue = m_client.createQueue(m_serviceName);
 	m_queue->bind(defaultExchange, id);
 
@@ -81,7 +82,7 @@ void AmqpManager::queueDeclaredRecieve()
 	QAmqpQueue *queue = dynamic_cast<QAmqpQueue*>(sender());
 	if (!queue)
 		return;
-
+	
 	connect(queue, SIGNAL(messageReceived()), this, SLOT(messageReceived()));
 	queue->consume(QAmqpQueue::coNoAck);
 }
@@ -98,23 +99,26 @@ void AmqpManager::queueDeclaredSend()
 
 bool AmqpManager::authenticateUser(QString username, QString password)
 {
-	HoSRequest *req = new HoSRequest(this, "", m_serviceName);
-	req->args.append(username);
-	req->args.append(password);
-	req->action = retrieve;
-	req->type = user;
-	req->setResponseNeeded(true);
+		HoSRequest *req = new HoSRequest(this, "", m_serviceName);
+		req->args.append(username);
+		req->args.append(password);
 
-	requests.clear();
-	requests.append(req);
-	sendMessage("datamanager", req);
+		req->setAction(retrieve);
+		req->setType(user);
+		req->setResponseNeeded(true);
 
-	return req->authenticateResponce;
+		requests.clear();
+		requests.append(req);
+		sendMessage("datamanager", req);
+
+		return req->authenticateResponce;
 }
 
 void AmqpManager::sendMessage(QString to, HoSRequest *req)
 {
 	QAmqpExchange* defaultExchange = m_client.createExchange(to);
+	defaultExchange->declare(QAmqpExchange::Direct, QAmqpExchange::AutoDelete | QAmqpExchange::NoWait); 
+
 	QAmqpMessage::PropertyHash properties;
 	properties.insert(QAmqpMessage::ContentType, "application/json");
 
