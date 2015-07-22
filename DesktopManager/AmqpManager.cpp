@@ -23,9 +23,16 @@ void AmqpManager::start()
 
 void AmqpManager::clientConnected()
 {
-	QAmqpQueue *queue = m_client.createQueue("hello");
-	connect(queue, SIGNAL(declared()), this, SLOT(queueDeclaredRecieve()));
-	queue->declare();
+	QAmqpExchange* defaultExchange = m_client.createExchange("desktopmanager");
+	defaultExchange->declare(QAmqpExchange::Direct, QAmqpExchange::AutoDelete);
+	QString id = QUuid::createUuid().toString().replace("{", "").replace("}", "");
+	m_serviceName = "desktopmanager." + id;
+	m_queue = m_client.createQueue(m_serviceName);
+	m_queue->bind(defaultExchange, id);
+
+	connect(m_queue, SIGNAL(declared()), this, SLOT(queueDeclaredRecieve()));
+	m_queue->declare();
+
 }
 
 
@@ -39,12 +46,27 @@ void AmqpManager::messageReceived() {
 
 	QAmqpMessage message = queue->dequeue();
 
-	/*QLabel * label = ui.this->findChild<QLabel*>("label");
-	label->setText(message.payload());*/
+	/*QLabel * label = ui.this->findChild<QLabel*>("label");*/
+	QString ali =  message.payload();
+
+	QJsonDocument d = QJsonDocument::fromJson(ali.toUtf8());
+
+	QJsonObject sett2 = d.object();
+
+	QJsonValue value = sett2.value(QString("authorized"));
+
+	if (value.toBool() == true)
+	{
+		ali = "yay";
+	}
+
+	ali += "asd";
 }
 
 void AmqpManager::queueDeclaredRecieve()
 {
+	
+
 	QAmqpQueue *queue = dynamic_cast<QAmqpQueue*>(sender());
 	if (!queue)
 		return;
@@ -62,4 +84,26 @@ void AmqpManager::queueDeclaredSend()
 		return;
 	QAmqpExchange *defaultExchange = m_client.createExchange();
 	defaultExchange->publish("Hello World!" + QString::number(++count), "hello");
+}
+
+void AmqpManager::sendMessage(QString to, QString message)
+{
+	QString mes;
+	mes += "{";
+	mes += "\"action\": \"retrieve\", ";
+	mes += "\"type\": \"user\", ";
+	mes += "\"payload\": { ";
+	mes += "\"username\": \"ali\", ";
+	mes += "\"password\": \"alikh\" ";
+	mes += "}, ";
+	mes += "\"sender\": \"" + m_serviceName + "\" ,";
+	mes += "\"responceNeeded\": true , ";
+	mes += "\"id\": \"" + QUuid::createUuid().toString().replace("{", "").replace("}", "") + "\" ";
+	mes += "} ";
+
+	QAmqpExchange* defaultExchange = m_client.createExchange(to);
+	QAmqpMessage::PropertyHash properties;
+	properties.insert(QAmqpMessage::ContentType, "application/json");
+
+	defaultExchange->publish(mes, "", properties);
 }

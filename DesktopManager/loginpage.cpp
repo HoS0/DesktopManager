@@ -1,6 +1,6 @@
 #include "loginpage.h"
 
-LoginPage::LoginPage(QWidget *parent)
+LoginPage::LoginPage(QWidget *parent, AmqpManager* amqpManager)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
@@ -11,13 +11,15 @@ LoginPage::LoginPage(QWidget *parent)
 		setFixedHeight(parent->height());
 	}
 
+	m_amqpManager = amqpManager;
+
 	m_backgroungR = 100;
 	m_backgroungG = 100;
 	m_backgroungB = 200;
 
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(updateBackground()));
-	timer->start(1000);
+	timer->start(300);
 
 	m_color = new QColor(m_backgroungR, m_backgroungG, m_backgroungB);
 	this->setAutoFillBackground(true);
@@ -150,6 +152,19 @@ QColor LoginPage::color()
 
 void LoginPage::checkCredentials()
 {
+	QString mes;
+	mes += "{";
+	mes += "\"action\": \"retrieve\", ";
+	mes += "\"type\": \"user\", ";
+	mes += "\"payload\": { ";
+	mes += "\"username\": \"ali\", ";
+	mes += "\"password\": \"alikh\" ";
+	mes += "}, ";
+	mes += "\"sender\": \"memememe\" ";
+	mes += "} ";
+
+	m_amqpManager->sendMessage("datamanager", mes);
+
 	if (usernameEditor->text().trimmed() == "ali" && passwordEditor->text() == "alikh")
 	{
 		emit loginAccepted();

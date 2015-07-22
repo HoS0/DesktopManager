@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
 	temp->setLayout(layout3);
 
 	QVBoxLayout *layout1 = new QVBoxLayout();
-	loginPage = new LoginPage(this);
+	loginPage = new LoginPage(this, m_amqpManger);
 	connect(loginPage, SIGNAL(loginAccepted()), this, SLOT(removeLoginPage()));
 
 	//centralWidget()->setStyleSheet("background-image: url('c:/1.png'); 	background-position: center;");

@@ -10,7 +10,9 @@
 #include "qamqpclient.h"
 #include "qamqpexchange.h"
 #include "qamqpqueue.h"
-
+#include "QUuid"
+#include <QJsonDocument>
+#include <QJsonObject>
 
 class AmqpManager : public QObject
 {
@@ -20,6 +22,7 @@ public:
 	AmqpManager();
 	~AmqpManager();
 
+	void sendMessage(QString to, QString message);
 
 public slots:
 	void start();
@@ -34,6 +37,10 @@ private slots:
 
 private:
 	QAmqpClient m_client;
+
+	QAmqpQueue *m_queue;
+
+	QString m_serviceName;
 };
 
 #endif

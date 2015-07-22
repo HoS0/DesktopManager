@@ -24,6 +24,7 @@
 #include "qamqpclient.h"
 #include "qamqpexchange.h"
 #include "qamqpqueue.h"
+#include "AmqpManager.h"
 
 
 class LoginPage : public QWidget
@@ -31,7 +32,7 @@ class LoginPage : public QWidget
 	Q_OBJECT
 
 public:
-	LoginPage(QWidget *parent = 0);
+	LoginPage(QWidget *parent = 0, AmqpManager* amqpManager = 0);
 	~LoginPage();
 
 private:
@@ -46,6 +47,7 @@ private:
 	QLineEdit *usernameEditor;
 	QLineEdit *passwordEditor;
 
+public slots:
 	void updateBackground();
 	void disapear();
 
@@ -57,8 +59,8 @@ signals:
 	void loginAccepted();
 
 private:
-	QAmqpClient m_client;
 	QColor *m_color;
+	AmqpManager* m_amqpManager;
 
 public:
 	void setColor(const QColor &value);
