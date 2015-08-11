@@ -22,6 +22,8 @@
 #include "loginpage.h"
 #include "AmqpManager.h"
 
+#include "qjsonview.h"
+
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -37,6 +39,8 @@ private:
 
 	LoginPage* loginPage;
 	AmqpManager* m_amqpManger;
+
+	QJsonView* m_jsonView;
 
 public slots:
 	void removeLoginPage();

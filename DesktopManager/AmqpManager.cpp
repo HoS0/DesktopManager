@@ -5,7 +5,11 @@ AmqpManager::AmqpManager()
 {
 	id = QUuid::createUuid().toString().replace("{", "").replace("}", "");
 	m_serviceName = "desktopmanager." + id;
-	start();
+	start();	
+
+	QTimer *timerCheckQueue = new QTimer(this);
+	connect(timerCheckQueue, SIGNAL(timeout()), this, SLOT(checkSentQueue()));
+	timerCheckQueue->start(3000);
 }
 
 
@@ -14,6 +18,18 @@ AmqpManager::~AmqpManager()
 	m_client.disconnectFromHost();
 }
 
+void AmqpManager::checkSentQueue()
+{
+	foreach(HoSRequest* h, requests)
+	{
+		if (h->createdTime.secsTo(QTime::currentTime()) > 4)
+		{
+			h->failMessage = "Operation timed out.";
+			requests.removeAll(h);
+			emit h->replyRecieved();
+		}
+	}
+}
 
 
 void AmqpManager::start()
@@ -63,17 +79,19 @@ void AmqpManager::messageReceived() {
 			QJsonValue authValue = payloadObject.value("authorized");
 
 			h->authenticateResponce = authValue.toBool();
-			if (h->authenticateResponce)
-			{
-				emit requests.at(0)->replyRecieved();
-			}
+			if (h->authenticateResponce == false)
+				h->failMessage = "wrong username or password";
+			
+			emit h->replyRecieved();
 		}
 	}
+
+
 
 	if (foundedRequest != 0)
 	{
 		requests.removeAll(foundedRequest);
-		delete foundedRequest;
+		//delete foundedRequest;
 	}
 }
 
@@ -97,7 +115,7 @@ void AmqpManager::queueDeclaredSend()
 	defaultExchange->publish("Hello World!" + QString::number(++count), "hello");
 }
 
-bool AmqpManager::authenticateUser(QString username, QString password)
+HoSRequest* AmqpManager::authenticateUser(QString username, QString password, QString& json)
 {
 		HoSRequest *req = new HoSRequest(this, "", m_serviceName);
 		req->args.append(username);
@@ -109,12 +127,13 @@ bool AmqpManager::authenticateUser(QString username, QString password)
 
 		requests.clear();
 		requests.append(req);
-		sendMessage("datamanager", req);
+		
+		json = sendMessage("datamanager", req);
 
-		return req->authenticateResponce;
+		return req;
 }
 
-void AmqpManager::sendMessage(QString to, HoSRequest *req)
+QString AmqpManager::sendMessage(QString to, HoSRequest *req)
 {
 	QAmqpExchange* defaultExchange = m_client.createExchange(to);
 	defaultExchange->declare(QAmqpExchange::Direct, QAmqpExchange::AutoDelete | QAmqpExchange::NoWait); 
@@ -129,5 +148,6 @@ void AmqpManager::sendMessage(QString to, HoSRequest *req)
 	if (req->responseNeeded)
 		wait_loop.exec();
 
-	return;
+	delete defaultExchange;
+	return req->msgToSend;
 }

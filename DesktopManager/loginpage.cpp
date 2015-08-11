@@ -1,6 +1,6 @@
 #include "loginpage.h"
 
-LoginPage::LoginPage(QWidget *parent, AmqpManager* amqpManager)
+LoginPage::LoginPage(QWidget *parent, AmqpManager* amqpManager, QJsonView* jsonView)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
@@ -16,6 +16,8 @@ LoginPage::LoginPage(QWidget *parent, AmqpManager* amqpManager)
 	m_backgroungR = 100;
 	m_backgroungG = 100;
 	m_backgroungB = 200;
+
+	m_jsonView = jsonView;
 
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(updateBackground()));
@@ -58,18 +60,18 @@ LoginPage::LoginPage(QWidget *parent, AmqpManager* amqpManager)
 	passwordEditor->setStyleSheet("background-color: rgb(255,255,255);	border: 1pt solid; border-color: blue; border-radius: 10px; font-size: 14pt;font-family: Tahoma, Geneva, sans-serif; ");
 	passwordEditor->setPlaceholderText("password");
 
-	label = new QLabel();
-	//label->setPixmap(pix);
-
-
-	label->setFixedWidth(std::min(label->width(), label->height()));
-	label->setFixedHeight(std::min(label->width(), label->height()));
-	//label->setStyleSheet("border: 1px solid; border-radius: 1px; overflow: hidden;");
-	label->setStyleSheet(" background-image: url('c:/1.png'); 	background-position: center;	background-repeat: no-repeat; background-attachment: fixed; border: 5px solid; border-color: white; border-radius: " + QString::number(label->width() / 2) + "px; font-size: 14pt;font-family: Tahoma, Geneva, sans-serif; ");
+	profilePic = new QLabel();
+	profilePic->setFixedWidth(std::min(profilePic->width(), profilePic->height()));
+	profilePic->setFixedHeight(std::min(profilePic->width(), profilePic->height()));
+	profilePic->setStyleSheet(" background-image: url('c:/1.png'); 	background-position: center;	background-repeat: no-repeat; background-attachment: fixed; border: 5px solid; border-color: white; border-radius: " + QString::number(profilePic->width() / 2) + "px; font-size: 14pt;font-family: Tahoma, Geneva, sans-serif; ");
 	QPalette *palette = new QPalette;
-	label->setAutoFillBackground(true);
+	profilePic->setAutoFillBackground(true);
 
-	layout->addWidget(label, 0, Qt::AlignCenter);
+	messageLabel = new QLabel();
+	messageLabel->setStyleSheet("color: red;font-size: 10pt;font-family: Tahoma, Geneva, sans-serif; ");
+
+	layout->addWidget(profilePic, 0, Qt::AlignCenter);
+	layout->addWidget(messageLabel, 100, Qt::AlignCenter);
 	layout->addWidget(usernameEditor, 100, Qt::AlignCenter);
 	layout->addWidget(passwordEditor, 100, Qt::AlignCenter);
 	layout->addWidget(button1, 100, Qt::AlignCenter);
@@ -152,8 +154,14 @@ QColor LoginPage::color()
 
 void LoginPage::checkCredentials()
 {
-	if (m_amqpManager->authenticateUser(usernameEditor->text().trimmed(), passwordEditor->text()))
+	QString json;
+	HoSRequest* req = m_amqpManager->authenticateUser(usernameEditor->text().trimmed(), passwordEditor->text(), json);
+	if (req->authenticateResponce)
 	{
 		emit loginAccepted();
 	}
+
+	messageLabel->setText(req->failMessage);
+
+	emit m_jsonView->setJsonValue(json);
 }

@@ -9,6 +9,10 @@ HoSRequest::HoSRequest(QObject *parent, QString msg, QString sender)
 	responseNeeded = true;
 	m_serviceName = sender;
 	authenticateResponce = false;
+
+	failMessage = "";
+
+	createdTime = QTime::currentTime();
 }
 
 HoSRequest::~HoSRequest()

@@ -25,6 +25,7 @@
 #include "qamqpexchange.h"
 #include "qamqpqueue.h"
 #include "AmqpManager.h"
+#include "qjsonview.h"
 
 
 class LoginPage : public QWidget
@@ -32,7 +33,7 @@ class LoginPage : public QWidget
 	Q_OBJECT
 
 public:
-	LoginPage(QWidget *parent = 0, AmqpManager* amqpManager = 0);
+	LoginPage(QWidget *parent = 0, AmqpManager* amqpManager = 0, QJsonView* jsonView = 0);
 	~LoginPage();
 
 private:
@@ -66,7 +67,10 @@ public:
 	void setColor(const QColor &value);
 	QColor color();
 
-	QLabel* label;
+	QLabel* profilePic;
+	QLabel* messageLabel;
+
+	QJsonView* m_jsonView;
 
 protected:
 

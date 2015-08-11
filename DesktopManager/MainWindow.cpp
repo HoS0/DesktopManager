@@ -20,9 +20,14 @@ MainWindow::MainWindow(QWidget *parent)
 	QHBoxLayout *layout3 = new QHBoxLayout;
 	temp->setLayout(layout3);
 
+	m_jsonView = new QJsonView(this);
+	m_jsonView->setFixedWidth(900);
+	m_jsonView->setFixedHeight(1200);
+
 	QVBoxLayout *layout1 = new QVBoxLayout();
-	loginPage = new LoginPage(this, m_amqpManger);
+	loginPage = new LoginPage(this, m_amqpManger, m_jsonView);
 	connect(loginPage, SIGNAL(loginAccepted()), this, SLOT(removeLoginPage()));
+
 
 	//centralWidget()->setStyleSheet("background-image: url('c:/1.png'); 	background-position: center;");
 }

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QUuid>
+#include <QTime>
 
 enum PayloadType
 {
@@ -34,6 +35,7 @@ public:
 	PayloadType type;
 	QList<QString> args;
 	bool authenticateResponce;
+	QTime createdTime;
 
 	bool responseNeeded;
 
@@ -51,6 +53,7 @@ private:
 public:
 	QString id;
 	QString msgToSend;
+	QString failMessage;
 
 };
 

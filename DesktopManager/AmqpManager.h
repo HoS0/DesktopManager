@@ -26,9 +26,9 @@ public:
 	AmqpManager();
 	~AmqpManager();
 
-	void sendMessage(QString to, HoSRequest *req);
+	QString sendMessage(QString to, HoSRequest *req);
 
-	bool authenticateUser(QString username, QString password);
+	HoSRequest* authenticateUser(QString username, QString password, QString& json);
 
 public slots:
 	void start();
@@ -41,6 +41,7 @@ private slots:
 
 	void messageReceived();
 
+	void checkSentQueue();
 
 private:
 	QAmqpClient m_client;
